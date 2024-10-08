@@ -5,6 +5,8 @@
   <script type="text/javascript" src="https://wybiral.github.io/code-art/projects/tiny-mirror/index.js"></script>
   <script src="https://kit.fontawesome.com/c4c45dfab4.js" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
+<!--   <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-storage.js"></script> -->
 </head>
 
 <div class="video-wrap" hidden="hidden">
@@ -230,5 +232,45 @@
     <button style="margin-right: 50px;">End</button>
   </div>
 </body>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyC215CENkjkGMvlDbQ7yb9S8wiQbArr3oo",
+    authDomain: "my-netlify.firebaseapp.com",
+    projectId: "my-netlify",
+    storageBucket: "my-netlify.appspot.com",
+    messagingSenderId: "113115899130",
+    appId: "1:113115899130:web:2f2b5b1741de0b6564d543",
+    measurementId: "G-FJ1SZZ31VZ"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
+  // Capture photo using input or camera
+const captureImage = async (file) => {
+  const storageRef = storage.ref();
+  const fileRef = storageRef.child(file.name);
+  await fileRef.put(file);
+  alert("File uploaded successfully");
+};
+
+// Handling file input and image capture
+const fileInput = document.getElementById("fileInput");
+fileInput.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  captureImage(file);
+});
+
+</script>
+  
 
 </html>
