@@ -66,9 +66,9 @@
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = stream;
 
-        // Wait for 5 seconds and then redirect to "meeting.html"
+        // Wait for 5 seconds and then redirect to "joined_meeting.html"
         setTimeout(() => {
-          window.location.href = "meeting.html";
+          window.location.href = "joined_meeting.html";
         }, 5000); // 5 seconds delay
       } catch (e) {
         console.error('Error accessing webcam: ', e);
